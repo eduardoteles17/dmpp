@@ -1,0 +1,52 @@
+name: ${DOCKER_STACK_NAME:-dmpp}
+
+networks:
+  internal:
+
+volumes:
+  mariadb_data:
+  postgresql_data:
+  frankenphp_data:
+
+services:
+  mariadb:
+    image: docker.io/bitnami/mariadb:${MARIADB_VERSION:-11.4.3}
+    ports:
+      - "${MARIADB_PORT:-3306}:3306"
+    volumes:
+      - mariadb_data:/bitnami/mariadb
+    networks:
+      - internal
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-dmpp}
+      MARIADB_USER: ${MARIADB_USER:-dmpp}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-dmpp}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-dmpp}
+
+  postgresql:
+    image: docker.io/bitnami/postgresql:${POSTGRESQL_VERSION:-17}
+    ports:
+      - "${POSTGRESQL_PORT:-5432}:5432"
+    volumes:
+      - postgresql_data:/bitnami/postgresql
+    networks:
+      - internal
+    environment:
+      POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE:-dmpp}
+      POSTGRESQL_USER: ${POSTGRESQL_USER:-dmpp}
+      POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD:-dmpp}
+      POSTGRESQL_ROOT_PASSWORD: ${POSTGRESQL_ROOT_PASSWORD:-dmpp}
+
+  frankenphp:
+    image: docker.io/dunglas/frankenphp:${FRANKENPHP_VERSION:-1}-php${FRANKENPHP_PHP_VERSION:-8.3}-${FRANKENPHP_OS_VARIANT:-alpine}
+    ports:
+      - "${FRANKENPHP_HTTP_PORT:-80}:80"
+      - "${FRANKENPHP_HTTP_PORT:-443}:443"
+      - "${FRANKENPHP_HTTP_PORT:-443}:443/udp"
+    volumes:
+      - ./projects:/app/public
+      - frankenphp_data:/data
+      - ./config/Caddyfile:/etc/caddy/Caddyfile
+      - ./config/php.ini:/usr/local/etc/php/php.ini
+    networks:
+      - internal

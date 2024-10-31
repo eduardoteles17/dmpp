@@ -1,0 +1,10 @@
+{
+	# Enable FrankenPHP
+	frankenphp
+}
+
+localhost {
+	root * /app/public
+  encode zstd br gzip
+	php_server
+}
